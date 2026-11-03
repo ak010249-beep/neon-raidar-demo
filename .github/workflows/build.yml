@@ -1,0 +1,44 @@
+name: Build Neon Radar APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'NeonRadarAndroidStudioProject.zip'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get project files
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Extract project
+        run: |
+          mkdir project
+          unzip NeonRadarAndroidStudioProject.zip -d project
+
+      - name: Build APK
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.9'
+          build-root-directory: project
+          arguments: assembleDebug
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Neon-Radar-APK
+          path: project/app/build/outputs/apk/debug/*.apk
+          
